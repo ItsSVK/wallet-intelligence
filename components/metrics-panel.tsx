@@ -1,86 +1,58 @@
-"use client"
+'use client';
 
-import { motion } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { motion } from 'framer-motion';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 
-interface Metrics {
-  txPerMinute: number
-  consistencyScore: number
-  concentrationScore: number
-  hubScore: number
-}
-
-interface MetricsPanelProps {
-  metrics: Metrics
-}
-
-function scoreColor(value: number) {
-  if (value >= 70) return "bg-emerald-500"
-  if (value >= 40) return "bg-amber-400"
-  return "bg-red-400"
-}
-
-function scoreLabel(value: number) {
-  if (value >= 70) return "text-emerald-600"
-  if (value >= 40) return "text-amber-600"
-  return "text-red-500"
+export interface ActivityMetrics {
+  txPerMinute: number;
+  consistencyScore: number;
 }
 
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.07 } },
-}
+};
 
 const rowVariants = {
   hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" as const } },
-}
+  visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' as const } },
+};
 
-export function MetricsPanel({ metrics }: MetricsPanelProps) {
-  const rows: { label: string; value: number; isRate?: boolean }[] = [
-    { label: "Transactions / min", value: metrics.txPerMinute, isRate: true },
-    { label: "Consistency Score", value: metrics.consistencyScore },
-    { label: "Concentration Score", value: metrics.concentrationScore },
-    { label: "Hub Score", value: metrics.hubScore },
-  ]
-
+export function MetricsPanel({ metrics }: { metrics: ActivityMetrics }) {
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-foreground">Metrics</h3>
-      <Card className="bg-white border-border">
-        <CardContent className="pt-4 pb-2">
+      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        Activity Metrics
+      </p>
+      <Card className="border-border bg-white">
+        <CardContent className="pt-4 pb-4">
           <motion.div
-            className="space-y-5"
+            className="space-y-4"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
-            {rows.map((row) => (
-              <motion.div key={row.label} variants={rowVariants} className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">{row.label}</span>
-                  <span className={`text-xs font-medium tabular-nums ${row.isRate ? "text-foreground" : scoreLabel(row.value)}`}>
-                    {row.isRate ? `${row.value.toFixed(1)}` : `${row.value}`}
-                  </span>
-                </div>
-                {!row.isRate && (
-                  <Progress
-                    value={row.value}
-                    colorClass={scoreColor(row.value)}
-                  />
-                )}
-                {row.isRate && (
-                  <Progress
-                    value={Math.min(100, (row.value / 5) * 100)}
-                    colorClass="bg-foreground/70"
-                  />
-                )}
-              </motion.div>
-            ))}
+            <motion.div variants={rowVariants} className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Transactions / min</span>
+                <span className="tabular-nums font-medium text-foreground">
+                  {metrics.txPerMinute.toFixed(1)}
+                </span>
+              </div>
+              <Progress value={Math.min(100, (metrics.txPerMinute / 5) * 100)} colorClass="bg-foreground/70" />
+            </motion.div>
+
+            <motion.div variants={rowVariants} className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Consistency Score</span>
+                <span className="tabular-nums font-medium text-foreground">{metrics.consistencyScore}</span>
+              </div>
+              <Progress value={metrics.consistencyScore} colorClass="bg-foreground/70" />
+            </motion.div>
           </motion.div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
