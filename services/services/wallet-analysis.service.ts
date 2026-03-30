@@ -1,52 +1,46 @@
-import type { SolRouter } from '@solrouter/sdk';
-import type { EnhancedTxClientLazy } from 'helius-sdk/enhanced/lazy';
-
-import { buildWalletAnalysisPrompt } from '../modules/ai/prompt-builder';
-import { buildWalletAnalysisInput } from '../modules/wallet-analysis/analytics';
-import { compressTransactions } from '../modules/wallet-analysis/compression';
-import type { WalletAnalysisInput } from '../modules/wallet-analysis/types';
-import type { SolRouterModel } from '../clients/solrouter';
-
-export interface WalletAnalysisServiceDependencies {
-  aiClient: Pick<SolRouter, 'chat'>;
-  transactionClient: Pick<EnhancedTxClientLazy, 'getTransactionsByAddress'>;
-}
-
-export interface AnalyzeWalletRequest {
-  walletAddress: string;
-  transactionLimit: number;
-  model: SolRouterModel;
-}
-
-export interface AnalyzeWalletResult {
-  walletAddress: string;
-  input: WalletAnalysisInput;
-  prompt: string;
-  responseMessage: unknown;
-}
+import { buildWalletAnalysisPrompt } from '../modules/ai/prompt-builder'
+import type { WalletAnalysisInput } from '../modules/wallet-analysis/types'
+import { getRuntimeConfig } from '@/services/utils/util'
+import { GetEnhancedTransactionsByAddressResponse } from 'helius-sdk/enhanced/types'
+import { createHeliusClient } from '@/services/clients/helius'
+import { createSolRouterClient } from '@/services/clients/solrouter'
+import { AnalyzeWalletResult } from '@/services/types'
+const { heliusApiKey, transactionLimit, solRouterApiKey, model } = getRuntimeConfig()
 
 export async function analyzeWallet(
-  dependencies: WalletAnalysisServiceDependencies,
-  request: AnalyzeWalletRequest,
+  walletAddress: string,
+  input: WalletAnalysisInput,
 ): Promise<AnalyzeWalletResult> {
-  const transactions = await dependencies.transactionClient.getTransactionsByAddress({
-    address: request.walletAddress,
-    limit: request.transactionLimit,
-    commitment: 'confirmed',
-  });
+  let responseMessage: unknown = null
+  let aiError: string | null = null
 
-  const compressedTransactions = compressTransactions(transactions);
-  const input = buildWalletAnalysisInput(compressedTransactions);
-  const prompt = buildWalletAnalysisPrompt(input);
+  try {
+    const response = await createSolRouterClient(solRouterApiKey).chat(
+      buildWalletAnalysisPrompt(input),
+      {
+        model: model,
+      },
+    )
 
-  const response = await dependencies.aiClient.chat(prompt, {
-    model: request.model,
-  });
+    responseMessage = response.message
+  } catch (error) {
+    aiError = error instanceof Error ? error.message : 'Failed to generate AI analysis.'
+  }
 
   return {
-    walletAddress: request.walletAddress,
+    walletAddress: walletAddress,
     input,
-    prompt,
-    responseMessage: response.message,
-  };
+    responseMessage,
+    aiError,
+  }
+}
+
+export async function fetchWalletTransactions(
+  walletAddress: string,
+): Promise<GetEnhancedTransactionsByAddressResponse> {
+  return createHeliusClient(heliusApiKey).getTransactionsByAddress({
+    address: walletAddress,
+    limit: transactionLimit,
+    commitment: 'confirmed',
+  })
 }

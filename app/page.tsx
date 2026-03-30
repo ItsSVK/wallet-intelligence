@@ -14,7 +14,7 @@ import { GraphIntelligence } from '@/components/graph-intelligence';
 import { ProtocolUsage } from '@/components/protocol-usage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import type { AnalyzeResponse, AnalyzeStreamEvent } from '@/app/api/analyze/route';
+import type { AnalyzeResponse, AnalyzeStreamEvent } from '@/app/api/analyze/types';
 
 type View = 'landing' | 'loading' | 'results';
 
