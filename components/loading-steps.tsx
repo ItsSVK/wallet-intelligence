@@ -1,38 +1,31 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { motion } from "framer-motion"
 import { Check, Loader2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 
-const STEPS = [
-  "Fetching transactions...",
-  "Processing wallet activity...",
-  "Building behavioral model...",
-  "Analyzing with AI...",
-]
-
-const STEP_DURATION = 900
-
 interface LoadingStepsProps {
+  // Full step labels, received from the backend's init event
+  allSteps: string[]
+  // Index of the step currently in progress (-1 = awaiting first step event)
+  currentStepIndex: number
+  // True once the backend emits { type: "done" }
+  isDone: boolean
   onComplete: () => void
 }
 
-export function LoadingSteps({ onComplete }: LoadingStepsProps) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [completed, setCompleted] = useState<number[]>([])
-
+export function LoadingSteps({
+  allSteps,
+  currentStepIndex,
+  isDone,
+  onComplete,
+}: LoadingStepsProps) {
   useEffect(() => {
-    if (currentStep >= STEPS.length) {
-      const t = setTimeout(onComplete, 400)
-      return () => clearTimeout(t)
-    }
-    const t = setTimeout(() => {
-      setCompleted((prev) => [...prev, currentStep])
-      setCurrentStep((prev) => prev + 1)
-    }, STEP_DURATION)
+    if (!isDone) return
+    const t = setTimeout(onComplete, 400)
     return () => clearTimeout(t)
-  }, [currentStep, onComplete])
+  }, [isDone, onComplete])
 
   return (
     <motion.div
@@ -52,23 +45,19 @@ export function LoadingSteps({ onComplete }: LoadingStepsProps) {
         </div>
 
         <ol className="space-y-3">
-          {STEPS.map((step, i) => {
-            const isDone = completed.includes(i)
-            const isActive = currentStep === i
+          {allSteps.map((label, i) => {
+            const isDoneStep = isDone || i < currentStepIndex
+            const isActive = !isDone && i === currentStepIndex
             return (
               <motion.li
-                key={step}
+                key={i}
                 className="flex items-center gap-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.25,
-                  delay: i * 0.06,
-                  ease: "easeOut",
-                }}
+                transition={{ duration: 0.25, delay: i * 0.06, ease: "easeOut" }}
               >
                 <div className="shrink-0 w-5 h-5 flex items-center justify-center">
-                  {isDone ? (
+                  {isDoneStep ? (
                     <motion.div
                       initial={{ scale: 0.6, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
@@ -84,25 +73,27 @@ export function LoadingSteps({ onComplete }: LoadingStepsProps) {
                 </div>
                 <span
                   className={
-                    isDone
+                    isDoneStep
                       ? "text-sm text-muted-foreground line-through"
                       : isActive
                         ? "text-sm text-foreground font-medium"
                         : "text-sm text-muted-foreground/50"
                   }
                 >
-                  {step}
+                  {label}
                 </span>
               </motion.li>
             )
           })}
         </ol>
 
-        <div className="space-y-2 pt-2">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-5/6" />
-        </div>
+        {allSteps.length > 0 && (
+          <div className="space-y-2 pt-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-5/6" />
+          </div>
+        )}
       </div>
     </motion.div>
   )

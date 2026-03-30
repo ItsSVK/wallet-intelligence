@@ -14,73 +14,69 @@ import { GraphIntelligence } from '@/components/graph-intelligence';
 import { ProtocolUsage } from '@/components/protocol-usage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import type { AnalyzeResponse, AnalyzeStreamEvent } from '@/app/api/analyze/route';
 
 type View = 'landing' | 'loading' | 'results';
-
-const MOCK_RESULT = {
-  walletProfile: 'DeFi Power User',
-  confidence: 87,
-  riskLevel: 'Medium' as const,
-  behaviorSummary:
-    'This wallet demonstrates consistent high-frequency trading behavior concentrated in DeFi protocols. Activity patterns suggest an experienced operator with systematic execution habits — likely using automated tooling for a portion of transaction volume. Interaction graph analysis shows strong centrality with limited exposure to high-risk token launches. No mixing patterns or obfuscation signals detected.',
-  signals: [
-    {
-      title: 'High Frequency Execution',
-      description:
-        'Transaction rate significantly exceeds typical wallet averages, suggesting automated or semi-automated tooling.',
-    },
-    {
-      title: 'Protocol Concentration',
-      description:
-        'Over 70% of activity concentrated in 3 protocols, indicating deliberate strategy rather than exploration.',
-    },
-    {
-      title: 'Consistent Timing Patterns',
-      description:
-        'Transactions cluster in predictable time windows, pointing to scheduled or algorithmic execution.',
-    },
-    {
-      title: 'Low Dust Activity',
-      description:
-        'Minimal micro-transactions or spam patterns. Clean operational hygiene throughout the observed period.',
-    },
-  ],
-  metrics: {
-    txPerMinute: 2.4,
-    consistencyScore: 82,
-  },
-  graph: {
-    uniqueConnections: 142,
-    concentrationScore: 74,
-    hubScore: 61,
-  },
-  activity: [
-    { type: 'SOL_TRANSFER', pattern: 'multi-recipient', intent: 'airdrop_distribution', timestamp: '2h ago' },
-    { type: 'NFT_TRANSFER', pattern: 'single', intent: 'payment', timestamp: '5h ago' },
-    { type: 'SOL_TRANSFER', pattern: 'single', intent: 'consolidation', timestamp: '9h ago' },
-    { type: 'SOL_TRANSFER', pattern: 'multi-recipient', intent: 'batch_payout', timestamp: '14h ago' },
-    { type: 'NFT_TRANSFER', pattern: 'single', intent: 'sale', timestamp: '1d ago' },
-  ],
-  flow: {
-    direction: 'mostly_outgoing' as const,
-    outgoing: 64,
-    incoming: 36,
-  },
-  protocols: [
-    { name: 'sol_transfer', count: 847, pct: 52 },
-    { name: 'compressed_nft', count: 412, pct: 25 },
-    { name: 'token_swap', count: 211, pct: 13 },
-    { name: 'other', count: 163, pct: 10 },
-  ],
-};
 
 export default function Home() {
   const [view, setView] = useState<View>('landing');
   const [walletAddress, setWalletAddress] = useState('');
+  const [allSteps, setAllSteps] = useState<string[]>([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(-1);
+  const [loadingDone, setLoadingDone] = useState(false);
+  const [result, setResult] = useState<AnalyzeResponse | null>(null);
 
-  const handleAnalyze = useCallback((address: string) => {
+  const handleAnalyze = useCallback(async (address: string) => {
     setWalletAddress(address);
+    setAllSteps([]);
+    setCurrentStepIndex(-1);
+    setLoadingDone(false);
+    setResult(null);
     setView('loading');
+
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address }),
+      });
+
+      if (!response.ok || !response.body) {
+        setView('landing');
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        // Keep the last (possibly incomplete) line in the buffer
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+
+          const event = JSON.parse(trimmed) as AnalyzeStreamEvent;
+          if (event.type === 'init') {
+            setAllSteps(event.steps);
+          } else if (event.type === 'step') {
+            setCurrentStepIndex(event.index);
+          } else if (event.type === 'done') {
+            setResult(event.result);
+            setLoadingDone(true);
+          }
+        }
+      }
+    } catch {
+      setView('landing');
+    }
   }, []);
 
   const handleLoadingComplete = useCallback(() => {
@@ -90,6 +86,10 @@ export default function Home() {
   const handleReset = useCallback(() => {
     setView('landing');
     setWalletAddress('');
+    setAllSteps([]);
+    setCurrentStepIndex(-1);
+    setLoadingDone(false);
+    setResult(null);
   }, []);
 
   return (
@@ -117,11 +117,16 @@ export default function Home() {
             transition={{ duration: 0.2 }}
             className="flex w-full flex-1"
           >
-            <LoadingSteps onComplete={handleLoadingComplete} />
+            <LoadingSteps
+                allSteps={allSteps}
+                currentStepIndex={currentStepIndex}
+                isDone={loadingDone}
+                onComplete={handleLoadingComplete}
+              />
           </motion.div>
         )}
 
-        {view === 'results' && (
+        {view === 'results' && result && (
           <motion.div
             key="results"
             initial={{ opacity: 0 }}
@@ -145,9 +150,9 @@ export default function Home() {
               {/* Full-width header */}
               <SummaryCard
                 walletAddress={walletAddress}
-                walletProfile={MOCK_RESULT.walletProfile}
-                confidence={MOCK_RESULT.confidence}
-                riskLevel={MOCK_RESULT.riskLevel}
+                walletProfile={result.walletProfile}
+                confidence={result.confidence}
+                riskLevel={result.riskLevel}
               />
 
               {/* 2-column layout: 65% left / 35% right */}
@@ -170,7 +175,7 @@ export default function Home() {
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm leading-7 text-foreground">
-                          {MOCK_RESULT.behaviorSummary}
+                          {result.behaviorSummary}
                         </p>
                       </CardContent>
                     </Card>
@@ -182,7 +187,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25, delay: 0.1 }}
                   >
-                    <SignalsGrid signals={MOCK_RESULT.signals} />
+                    <SignalsGrid signals={result.signals} />
                   </motion.div>
 
                   {/* Activity Timeline */}
@@ -191,7 +196,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25, delay: 0.15 }}
                   >
-                    <ActivityList items={MOCK_RESULT.activity} />
+                    <ActivityList items={result.activity} />
                   </motion.div>
                 </div>
 
@@ -204,7 +209,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25, delay: 0.08 }}
                   >
-                    <FlowSection flow={MOCK_RESULT.flow} />
+                    <FlowSection flow={result.flow} />
                   </motion.div>
 
                   {/* Graph Intelligence */}
@@ -213,7 +218,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25, delay: 0.12 }}
                   >
-                    <GraphIntelligence graph={MOCK_RESULT.graph} />
+                    <GraphIntelligence graph={result.graph} />
                   </motion.div>
 
                   {/* Activity Metrics */}
@@ -222,7 +227,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25, delay: 0.16 }}
                   >
-                    <MetricsPanel metrics={MOCK_RESULT.metrics} />
+                    <MetricsPanel metrics={result.metrics} />
                   </motion.div>
 
                   {/* Protocol Usage */}
@@ -231,7 +236,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25, delay: 0.2 }}
                   >
-                    <ProtocolUsage protocols={MOCK_RESULT.protocols} />
+                    <ProtocolUsage protocols={result.protocols} />
                   </motion.div>
                 </div>
               </div>
