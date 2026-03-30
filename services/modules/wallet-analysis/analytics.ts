@@ -1,6 +1,12 @@
 import type { CompressedTransaction, WalletAnalysisInput } from './types'
 import { buildGraph, computeGraphStats } from './graph'
-import { classifyAmount, classifyIntent, classifySolPattern, inferWalletType, mapProtocol } from './classifiers'
+import {
+  classifyAmount,
+  classifyIntent,
+  classifySolPattern,
+  inferWalletType,
+  mapProtocol,
+} from './classifiers'
 
 const RECENT_ACTIVITY_LIMIT = 5
 
@@ -52,7 +58,8 @@ export function buildWalletAnalysisInput(txs: CompressedTransaction[]): WalletAn
     : 0
 
   const transferVariance = transferCounts.length
-    ? transferCounts.reduce((sum, v) => sum + Math.pow(v - avgTransfers, 2), 0) / transferCounts.length
+    ? transferCounts.reduce((sum, v) => sum + Math.pow(v - avgTransfers, 2), 0) /
+      transferCounts.length
     : 0
 
   const summaryWithoutWalletType = {
@@ -72,7 +79,10 @@ export function buildWalletAnalysisInput(txs: CompressedTransaction[]): WalletAn
         : ('balanced' as const)
 
   return {
-    summary: { ...summaryWithoutWalletType, wallet_type: inferWalletType(summaryWithoutWalletType) },
+    summary: {
+      ...summaryWithoutWalletType,
+      wallet_type: inferWalletType(summaryWithoutWalletType),
+    },
     activity: {
       tx_per_minute: txPerMinute,
       consistency_score: avgTransfers ? 1 / (1 + transferVariance) : 0,

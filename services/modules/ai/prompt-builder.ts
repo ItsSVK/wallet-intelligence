@@ -1,4 +1,4 @@
-import type { WalletAnalysisInput } from '../wallet-analysis/types';
+import type { WalletAnalysisInput } from '../wallet-analysis/types'
 
 export function buildWalletAnalysisPrompt(input: WalletAnalysisInput): string {
   const prompt = `
@@ -84,7 +84,7 @@ OUTPUT FORMAT (STRICT JSON ONLY):
   "risk_level": "low | medium | high",
   "confidence": "low | medium | high"
 }
-`;
+`
 
-  return prompt.trim();
+  return prompt.trim()
 }

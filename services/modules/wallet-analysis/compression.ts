@@ -3,21 +3,19 @@ import type {
   EnhancedTokenTransfer,
   EnhancedTransaction,
   GetEnhancedTransactionsByAddressResponse,
-} from 'helius-sdk/enhanced/types';
+} from 'helius-sdk/enhanced/types'
 
-import type { CompressedTransaction } from './types';
+import type { CompressedTransaction } from './types'
 
-const LAMPORTS_PER_SOL = 1_000_000_000;
+const LAMPORTS_PER_SOL = 1_000_000_000
 
 interface CompressedNftEvent {
-  oldLeafOwner?: string | null;
-  newLeafOwner?: string | null;
-  assetId?: string | null;
+  oldLeafOwner?: string | null
+  newLeafOwner?: string | null
+  assetId?: string | null
 }
 
-export function compressTransaction(
-  tx: EnhancedTransaction,
-): CompressedTransaction {
+export function compressTransaction(tx: EnhancedTransaction): CompressedTransaction {
   const baseTransaction = {
     signature: tx.signature,
     type: tx.type ?? 'UNKNOWN',
@@ -25,10 +23,10 @@ export function compressTransaction(
     time: tx.timestamp ?? 0,
     fee: tx.fee ?? 0,
     actor: tx.feePayer ?? '',
-  };
+  }
 
   if ((tx.type ?? '').includes('NFT')) {
-    const event = extractCompressedNftEvent(tx);
+    const event = extractCompressedNftEvent(tx)
 
     return {
       ...baseTransaction,
@@ -38,15 +36,12 @@ export function compressTransaction(
         to: event?.newLeafOwner ?? null,
         asset: event?.assetId ?? null,
       },
-    };
+    }
   }
 
-  const nativeTransfers = tx.nativeTransfers ?? [];
+  const nativeTransfers = tx.nativeTransfers ?? []
   if (nativeTransfers.length > 0) {
-    const totalLamports = nativeTransfers.reduce(
-      (sum, transfer) => sum + transfer.amount,
-      0,
-    );
+    const totalLamports = nativeTransfers.reduce((sum, transfer) => sum + transfer.amount, 0)
 
     return {
       ...baseTransaction,
@@ -58,18 +53,16 @@ export function compressTransaction(
           (transfer: EnhancedNativeTransfer) => transfer.toUserAccount,
         ),
         outgoingCount: nativeTransfers.filter(
-          (transfer: EnhancedNativeTransfer) =>
-            transfer.fromUserAccount === baseTransaction.actor,
+          (transfer: EnhancedNativeTransfer) => transfer.fromUserAccount === baseTransaction.actor,
         ).length,
         incomingCount: nativeTransfers.filter(
-          (transfer: EnhancedNativeTransfer) =>
-            transfer.toUserAccount === baseTransaction.actor,
+          (transfer: EnhancedNativeTransfer) => transfer.toUserAccount === baseTransaction.actor,
         ).length,
       },
-    };
+    }
   }
 
-  const tokenTransfers = tx.tokenTransfers ?? [];
+  const tokenTransfers = tx.tokenTransfers ?? []
   if (tokenTransfers.length > 0) {
     return {
       ...baseTransaction,
@@ -80,7 +73,7 @@ export function compressTransaction(
           amount: transfer.tokenAmount,
         })),
       },
-    };
+    }
   }
 
   return {
@@ -88,24 +81,22 @@ export function compressTransaction(
     action: {
       kind: 'UNKNOWN',
     },
-  };
+  }
 }
 
 export function compressTransactions(
   txs: GetEnhancedTransactionsByAddressResponse,
 ): CompressedTransaction[] {
-  return txs.map(compressTransaction);
+  return txs.map(compressTransaction)
 }
 
-function extractCompressedNftEvent(
-  tx: EnhancedTransaction,
-): CompressedNftEvent | null {
-  const events = tx.events as { compressed?: CompressedNftEvent[] } | undefined;
-  const compressedEvents = events?.compressed;
+function extractCompressedNftEvent(tx: EnhancedTransaction): CompressedNftEvent | null {
+  const events = tx.events as { compressed?: CompressedNftEvent[] } | undefined
+  const compressedEvents = events?.compressed
 
   if (!Array.isArray(compressedEvents) || compressedEvents.length === 0) {
-    return null;
+    return null
   }
 
-  return compressedEvents[0] ?? null;
+  return compressedEvents[0] ?? null
 }

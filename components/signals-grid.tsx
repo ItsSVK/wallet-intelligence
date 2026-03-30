@@ -1,27 +1,29 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { motion } from 'framer-motion'
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 interface Signal {
-  title: string;
-  description: string;
+  title: string
+  description: string
 }
 
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06 } },
-};
+}
 
 const itemVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' as const } },
-};
+}
 
 export function SignalsGrid({ signals }: { signals: Signal[] }) {
   return (
     <div className="space-y-3">
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Key Signals</p>
+      <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
+        Key Signals
+      </p>
       <motion.div
         className="grid grid-cols-2 gap-3"
         variants={containerVariants}
@@ -37,13 +39,17 @@ export function SignalsGrid({ signals }: { signals: Signal[] }) {
           >
             <Card className="h-full border-border bg-white">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-foreground">{signal.title}</CardTitle>
-                <CardDescription className="text-xs leading-relaxed">{signal.description}</CardDescription>
+                <CardTitle className="text-sm font-medium text-foreground">
+                  {signal.title}
+                </CardTitle>
+                <CardDescription className="text-xs leading-relaxed">
+                  {signal.description}
+                </CardDescription>
               </CardHeader>
             </Card>
           </motion.div>
         ))}
       </motion.div>
     </div>
-  );
+  )
 }

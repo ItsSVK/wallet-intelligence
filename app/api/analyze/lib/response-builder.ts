@@ -38,7 +38,14 @@ export function adaptAnalyzeResult(
     walletProfile,
     confidence: resolveConfidence(ai, result.input),
     riskLevel: resolveRiskLevel(ai, result.input),
-    behaviorSummary: buildBehaviorSummary(ai, result.input, flow, protocols, walletProfile, result.aiError),
+    behaviorSummary: buildBehaviorSummary(
+      ai,
+      result.input,
+      flow,
+      protocols,
+      walletProfile,
+      result.aiError,
+    ),
     signals: buildSignals(result.input, flow, graph, protocols, walletProfile),
     metrics: {
       txPerMinute: roundTo(result.input.activity.tx_per_minute, 2),

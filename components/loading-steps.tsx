@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import { useEffect } from "react"
-import { motion } from "framer-motion"
-import { Check, Loader2 } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Check, Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface LoadingStepsProps {
   // Full step labels, received from the backend's init event
@@ -29,19 +29,15 @@ export function LoadingSteps({
 
   return (
     <motion.div
-      className="flex flex-1 flex-col items-center justify-center w-full px-4"
+      className="flex w-full flex-1 flex-col items-center justify-center px-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
       <div className="w-full max-w-sm space-y-8">
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">
-            Analyzing wallet
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            This takes a few seconds.
-          </p>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Analyzing wallet</h2>
+          <p className="text-sm text-muted-foreground">This takes a few seconds.</p>
         </div>
 
         <ol className="space-y-3">
@@ -54,9 +50,9 @@ export function LoadingSteps({
                 className="flex items-center gap-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25, delay: i * 0.06, ease: "easeOut" }}
+                transition={{ duration: 0.25, delay: i * 0.06, ease: 'easeOut' }}
               >
-                <div className="shrink-0 w-5 h-5 flex items-center justify-center">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                   {isDoneStep ? (
                     <motion.div
                       initial={{ scale: 0.6, opacity: 0 }}
@@ -68,16 +64,16 @@ export function LoadingSteps({
                   ) : isActive ? (
                     <Loader2 className="size-4 animate-spin text-muted-foreground" />
                   ) : (
-                    <div className="w-1.5 h-1.5 rounded-full bg-border" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-border" />
                   )}
                 </div>
                 <span
                   className={
                     isDoneStep
-                      ? "text-sm text-muted-foreground line-through"
+                      ? 'text-sm text-muted-foreground line-through'
                       : isActive
-                        ? "text-sm text-foreground font-medium"
-                        : "text-sm text-muted-foreground/50"
+                        ? 'text-sm font-medium text-foreground'
+                        : 'text-sm text-muted-foreground/50'
                   }
                 >
                   {label}

@@ -1,28 +1,28 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 export interface ActivityItem {
-  type: string;
-  pattern: string;
-  intent: string;
-  timestamp: string;
+  type: string
+  pattern: string
+  intent: string
+  timestamp: string
 }
 
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.07 } },
-};
+}
 
 const itemVariants = {
   hidden: { opacity: 0, y: 8 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' as const } },
-};
+}
 
 export function ActivityList({ items }: { items: ActivityItem[] }) {
   return (
     <div className="space-y-3">
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+      <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
         Activity Timeline
       </p>
       <div className="overflow-hidden rounded-lg border border-border bg-white">
@@ -38,7 +38,9 @@ export function ActivityList({ items }: { items: ActivityItem[] }) {
               <div className="flex min-w-0 items-center gap-3">
                 <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/25" />
                 <div className="min-w-0">
-                  <p className="truncate font-mono text-xs font-medium text-foreground">{item.type}</p>
+                  <p className="truncate font-mono text-xs font-medium text-foreground">
+                    {item.type}
+                  </p>
                   <p className="text-xs text-muted-foreground">{item.pattern}</p>
                 </div>
               </div>
@@ -47,7 +49,7 @@ export function ActivityList({ items }: { items: ActivityItem[] }) {
                 <span className="rounded border border-border px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                   {item.intent}
                 </span>
-                <span className="whitespace-nowrap tabular-nums text-xs text-muted-foreground/60">
+                <span className="text-xs whitespace-nowrap text-muted-foreground/60 tabular-nums">
                   {item.timestamp}
                 </span>
               </div>
@@ -56,5 +58,5 @@ export function ActivityList({ items }: { items: ActivityItem[] }) {
         </motion.div>
       </div>
     </div>
-  );
+  )
 }

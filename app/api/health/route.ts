@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
 
 // GET /api/health
 export async function GET() {
@@ -6,5 +6,5 @@ export async function GET() {
     status: 'ok',
     service: 'wallet-intelligence',
     timestamp: new Date().toISOString(),
-  });
+  })
 }

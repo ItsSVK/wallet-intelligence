@@ -1,96 +1,96 @@
-'use client';
+'use client'
 
-import { useCallback, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
-import { WalletInput } from '@/components/wallet-input';
-import { LoadingSteps } from '@/components/loading-steps';
-import { SummaryCard } from '@/components/summary-card';
-import { SignalsGrid } from '@/components/signals-grid';
-import { MetricsPanel } from '@/components/metrics-panel';
-import { ActivityList } from '@/components/activity-list';
-import { FlowSection } from '@/components/flow-section';
-import { GraphIntelligence } from '@/components/graph-intelligence';
-import { ProtocolUsage } from '@/components/protocol-usage';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import type { AnalyzeResponse, AnalyzeStreamEvent } from '@/app/api/analyze/types';
+import { useCallback, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft } from 'lucide-react'
+import { WalletInput } from '@/components/wallet-input'
+import { LoadingSteps } from '@/components/loading-steps'
+import { SummaryCard } from '@/components/summary-card'
+import { SignalsGrid } from '@/components/signals-grid'
+import { MetricsPanel } from '@/components/metrics-panel'
+import { ActivityList } from '@/components/activity-list'
+import { FlowSection } from '@/components/flow-section'
+import { GraphIntelligence } from '@/components/graph-intelligence'
+import { ProtocolUsage } from '@/components/protocol-usage'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import type { AnalyzeResponse, AnalyzeStreamEvent } from '@/app/api/analyze/types'
 
-type View = 'landing' | 'loading' | 'results';
+type View = 'landing' | 'loading' | 'results'
 
 export default function Home() {
-  const [view, setView] = useState<View>('landing');
-  const [walletAddress, setWalletAddress] = useState('');
-  const [allSteps, setAllSteps] = useState<string[]>([]);
-  const [currentStepIndex, setCurrentStepIndex] = useState(-1);
-  const [loadingDone, setLoadingDone] = useState(false);
-  const [result, setResult] = useState<AnalyzeResponse | null>(null);
+  const [view, setView] = useState<View>('landing')
+  const [walletAddress, setWalletAddress] = useState('')
+  const [allSteps, setAllSteps] = useState<string[]>([])
+  const [currentStepIndex, setCurrentStepIndex] = useState(-1)
+  const [loadingDone, setLoadingDone] = useState(false)
+  const [result, setResult] = useState<AnalyzeResponse | null>(null)
 
   const handleAnalyze = useCallback(async (address: string) => {
-    setWalletAddress(address);
-    setAllSteps([]);
-    setCurrentStepIndex(-1);
-    setLoadingDone(false);
-    setResult(null);
-    setView('loading');
+    setWalletAddress(address)
+    setAllSteps([])
+    setCurrentStepIndex(-1)
+    setLoadingDone(false)
+    setResult(null)
+    setView('loading')
 
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address }),
-      });
+      })
 
       if (!response.ok || !response.body) {
-        setView('landing');
-        return;
+        setView('landing')
+        return
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
 
       while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+        const { done, value } = await reader.read()
+        if (done) break
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
         // Keep the last (possibly incomplete) line in the buffer
-        buffer = lines.pop() ?? '';
+        buffer = lines.pop() ?? ''
 
         for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) continue;
+          const trimmed = line.trim()
+          if (!trimmed) continue
 
-          const event = JSON.parse(trimmed) as AnalyzeStreamEvent;
+          const event = JSON.parse(trimmed) as AnalyzeStreamEvent
           if (event.type === 'init') {
-            setAllSteps(event.steps);
+            setAllSteps(event.steps)
           } else if (event.type === 'step') {
-            setCurrentStepIndex(event.index);
+            setCurrentStepIndex(event.index)
           } else if (event.type === 'done') {
-            setResult(event.result);
-            setLoadingDone(true);
+            setResult(event.result)
+            setLoadingDone(true)
           }
         }
       }
     } catch {
-      setView('landing');
+      setView('landing')
     }
-  }, []);
+  }, [])
 
   const handleLoadingComplete = useCallback(() => {
-    setView('results');
-  }, []);
+    setView('results')
+  }, [])
 
   const handleReset = useCallback(() => {
-    setView('landing');
-    setWalletAddress('');
-    setAllSteps([]);
-    setCurrentStepIndex(-1);
-    setLoadingDone(false);
-    setResult(null);
-  }, []);
+    setView('landing')
+    setWalletAddress('')
+    setAllSteps([])
+    setCurrentStepIndex(-1)
+    setLoadingDone(false)
+    setResult(null)
+  }, [])
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-white">
@@ -118,11 +118,11 @@ export default function Home() {
             className="flex w-full flex-1"
           >
             <LoadingSteps
-                allSteps={allSteps}
-                currentStepIndex={currentStepIndex}
-                isDone={loadingDone}
-                onComplete={handleLoadingComplete}
-              />
+              allSteps={allSteps}
+              currentStepIndex={currentStepIndex}
+              isDone={loadingDone}
+              onComplete={handleLoadingComplete}
+            />
           </motion.div>
         )}
 
@@ -157,10 +157,8 @@ export default function Home() {
 
               {/* 2-column layout: 65% left / 35% right */}
               <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-[65fr_35fr]">
-
                 {/* ── LEFT COLUMN ── */}
                 <div className="space-y-6">
-
                   {/* Behavioral Summary */}
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -169,7 +167,7 @@ export default function Home() {
                   >
                     <Card className="border-border bg-white">
                       <CardHeader className="pb-3">
-                        <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        <CardTitle className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
                           Behavioral Summary
                         </CardTitle>
                       </CardHeader>
@@ -202,7 +200,6 @@ export default function Home() {
 
                 {/* ── RIGHT COLUMN ── */}
                 <div className="space-y-4">
-
                   {/* Flow Analysis */}
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -260,5 +257,5 @@ export default function Home() {
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }

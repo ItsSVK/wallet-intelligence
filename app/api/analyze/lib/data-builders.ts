@@ -62,7 +62,14 @@ export function buildActivity(
   const sorted = [...transactions].sort((a, b) => b.time - a.time).slice(0, 5)
 
   if (sorted.length === 0) {
-    return [{ type: 'UNKNOWN', pattern: 'no recent activity', intent: 'unavailable', timestamp: 'recent' }]
+    return [
+      {
+        type: 'UNKNOWN',
+        pattern: 'no recent activity',
+        intent: 'unavailable',
+        timestamp: 'recent',
+      },
+    ]
   }
 
   return sorted.map((tx, i) => {
@@ -76,7 +83,9 @@ export function buildActivity(
           : inferTransferPattern(tx.action.transfers),
         intent: isSolTransferActivity(derived)
           ? derived.intent
-          : tx.action.transfers > 1 ? 'distribution' : 'payment',
+          : tx.action.transfers > 1
+            ? 'distribution'
+            : 'payment',
         timestamp: formatRelativeTimestamp(tx.time),
       }
     }
@@ -103,7 +112,12 @@ export function buildActivity(
       }
     }
 
-    return { type: tx.action.kind, pattern: 'unknown', intent: 'unknown', timestamp: formatRelativeTimestamp(tx.time) }
+    return {
+      type: tx.action.kind,
+      pattern: 'unknown',
+      intent: 'unknown',
+      timestamp: formatRelativeTimestamp(tx.time),
+    }
   })
 }
 
