@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { WalletInput } from '@/components/wallet-input'
 import { ParticleBackground } from '@/components/particle-background'
 import { LoadingSteps } from '@/components/loading-steps'
@@ -96,38 +97,25 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-background">
       <AnimatePresence mode="wait">
-        {view === 'landing' && (
+        {/* Landing stays mounted during loading — blurs out as the overlay appears */}
+        {(view === 'landing' || view === 'loading') && (
           <motion.div
             key="landing"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="relative flex w-full flex-1 cursor-none"
+            className={cn(
+              'relative flex w-full flex-1 cursor-none transition-[filter,transform] duration-500',
+              view === 'loading' &&
+                'pointer-events-none scale-[0.98] blur-sm brightness-90 select-none',
+            )}
           >
             <ParticleBackground />
             {/* Content sits above the particle layer */}
             <div className="relative z-10 flex w-full flex-1">
               <WalletInput onAnalyze={handleAnalyze} />
             </div>
-          </motion.div>
-        )}
-
-        {view === 'loading' && (
-          <motion.div
-            key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex w-full flex-1"
-          >
-            <LoadingSteps
-              allSteps={allSteps}
-              currentStepIndex={currentStepIndex}
-              isDone={loadingDone}
-              onComplete={handleLoadingComplete}
-            />
           </motion.div>
         )}
 
@@ -259,6 +247,18 @@ export default function Home() {
               </motion.div>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Loading overlay — fixed on top of the blurred landing */}
+      <AnimatePresence>
+        {view === 'loading' && (
+          <LoadingSteps
+            allSteps={allSteps}
+            currentStepIndex={currentStepIndex}
+            isDone={loadingDone}
+            onComplete={handleLoadingComplete}
+          />
         )}
       </AnimatePresence>
     </div>

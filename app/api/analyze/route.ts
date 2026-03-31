@@ -14,7 +14,7 @@ const STEPS = [
   'Fetching transactions...',
   'Processing wallet activity...',
   'Building behavioral model...',
-  'Analyzing with AI...',
+  'Analyzing with AI... (this may take a while)',
 ]
 
 const encoder = new TextEncoder()
