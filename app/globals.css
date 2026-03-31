@@ -83,19 +83,19 @@
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
+    --background: oklch(0.115 0.025 265);
+    --foreground: oklch(0.95 0 0);
+    --card: oklch(0.175 0.022 265);
+    --card-foreground: oklch(0.95 0 0);
+    --popover: oklch(0.175 0.022 265);
+    --popover-foreground: oklch(0.95 0 0);
     --primary: oklch(0.398 0.195 277.366);
     --primary-foreground: oklch(0.962 0.018 272.314);
     --secondary: oklch(0.274 0.006 286.033);
     --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
+    --muted: oklch(0.20 0.018 265);
+    --muted-foreground: oklch(0.65 0.015 265);
+    --accent: oklch(0.20 0.018 265);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 10%);
@@ -106,7 +106,7 @@
     --chart-3: oklch(0.546 0.245 262.881);
     --chart-4: oklch(0.488 0.243 264.376);
     --chart-5: oklch(0.424 0.199 265.638);
-    --sidebar: oklch(0.205 0 0);
+    --sidebar: oklch(0.175 0.022 265);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.585 0.233 277.117);
     --sidebar-primary-foreground: oklch(0.962 0.018 272.314);
@@ -127,3 +127,130 @@
     @apply font-sans;
     }
 }
+
+/* ── Particle background orb animations ── */
+@keyframes orb-drift-1 {
+  0%   { transform: translate(0px,   0px)   scale(1);    }
+  25%  { transform: translate(60px, -40px)  scale(1.06); }
+  50%  { transform: translate(30px,  70px)  scale(0.96); }
+  75%  { transform: translate(-50px, 20px)  scale(1.04); }
+  100% { transform: translate(0px,   0px)   scale(1);    }
+}
+@keyframes orb-drift-2 {
+  0%   { transform: translate(0px,   0px)   scale(1);    }
+  30%  { transform: translate(-70px, 50px)  scale(1.05); }
+  60%  { transform: translate(40px,  80px)  scale(0.97); }
+  85%  { transform: translate(60px, -30px)  scale(1.03); }
+  100% { transform: translate(0px,   0px)   scale(1);    }
+}
+@keyframes orb-drift-3 {
+  0%   { transform: translate(0px,  0px)    scale(1);    }
+  20%  { transform: translate(80px, 40px)   scale(1.07); }
+  55%  { transform: translate(-40px, 70px)  scale(0.95); }
+  80%  { transform: translate(-60px, -50px) scale(1.04); }
+  100% { transform: translate(0px,  0px)    scale(1);    }
+}
+@keyframes orb-drift-4 {
+  0%   { transform: translate(0px,   0px)   scale(1);    }
+  35%  { transform: translate(-50px, -60px) scale(1.05); }
+  65%  { transform: translate(70px, -30px)  scale(0.97); }
+  90%  { transform: translate(20px,  60px)  scale(1.03); }
+  100% { transform: translate(0px,   0px)   scale(1);    }
+}
+@keyframes orb-drift-5 {
+  0%   { transform: translate(0px,  0px)    scale(1);    }
+  40%  { transform: translate(50px, 60px)   scale(1.06); }
+  70%  { transform: translate(-60px, 30px)  scale(0.96); }
+  100% { transform: translate(0px,  0px)    scale(1);    }
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  pointer-events: none;
+  will-change: transform;
+}
+.orb-pink {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(255,182,200,0.55) 0%, rgba(255,182,200,0) 70%);
+  top: 5%; left: 8%;
+  animation: orb-drift-1 28s ease-in-out infinite;
+}
+.orb-blue {
+  width: 480px; height: 480px;
+  background: radial-gradient(circle, rgba(160,210,255,0.5) 0%, rgba(160,210,255,0) 70%);
+  top: 10%; right: 10%;
+  animation: orb-drift-2 34s ease-in-out infinite;
+}
+.orb-green {
+  width: 560px; height: 560px;
+  background: radial-gradient(circle, rgba(140,230,180,0.45) 0%, rgba(140,230,180,0) 70%);
+  bottom: 8%; right: 5%;
+  animation: orb-drift-3 30s ease-in-out infinite;
+}
+.orb-orange {
+  width: 460px; height: 460px;
+  background: radial-gradient(circle, rgba(255,205,120,0.45) 0%, rgba(255,205,120,0) 70%);
+  bottom: 10%; left: 5%;
+  animation: orb-drift-4 36s ease-in-out infinite;
+}
+.orb-lavender {
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(195,165,230,0.4) 0%, rgba(195,165,230,0) 70%);
+  top: 45%; left: 38%;
+  animation: orb-drift-5 32s ease-in-out infinite;
+}
+
+/* ── Mega orbs: very large, barely-moving, fixed depth layer ── */
+@keyframes mega-drift-1 {
+  0%   { transform: translate(0px,  0px); }
+  50%  { transform: translate(18px, 12px); }
+  100% { transform: translate(0px,  0px); }
+}
+@keyframes mega-drift-2 {
+  0%   { transform: translate(0px,   0px); }
+  50%  { transform: translate(-14px, 20px); }
+  100% { transform: translate(0px,   0px); }
+}
+@keyframes mega-drift-3 {
+  0%   { transform: translate(0px,  0px); }
+  50%  { transform: translate(20px, -16px); }
+  100% { transform: translate(0px,  0px); }
+}
+
+.mega-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(130px);
+  pointer-events: none;
+  will-change: transform;
+}
+.mega-orb-1 {
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(120,170,255,0.22) 0%, rgba(120,170,255,0) 65%);
+  top: -10%; left: -5%;
+  animation: mega-drift-1 55s ease-in-out infinite;
+}
+.mega-orb-2 {
+  width: 900px; height: 900px;
+  background: radial-gradient(circle, rgba(255,140,180,0.18) 0%, rgba(255,140,180,0) 65%);
+  bottom: -15%; right: -8%;
+  animation: mega-drift-2 65s ease-in-out infinite;
+}
+.mega-orb-3 {
+  width: 750px; height: 750px;
+  background: radial-gradient(circle, rgba(100,220,180,0.16) 0%, rgba(100,220,180,0) 65%);
+  top: 30%; right: 20%;
+  animation: mega-drift-3 60s ease-in-out infinite;
+}
+
+/* ── Dark-mode: lift orb & mega-orb opacity so glows pop on dark bg ── */
+.dark .orb-pink     { background: radial-gradient(circle, rgba(255,150,180,0.65) 0%, rgba(255,150,180,0) 70%); }
+.dark .orb-blue     { background: radial-gradient(circle, rgba(100,180,255,0.60) 0%, rgba(100,180,255,0) 70%); }
+.dark .orb-green    { background: radial-gradient(circle, rgba(80,220,160,0.55)  0%, rgba(80,220,160,0)  70%); }
+.dark .orb-orange   { background: radial-gradient(circle, rgba(255,180,80,0.55)  0%, rgba(255,180,80,0)  70%); }
+.dark .orb-lavender { background: radial-gradient(circle, rgba(180,130,255,0.55) 0%, rgba(180,130,255,0) 70%); }
+.dark .mega-orb-1   { background: radial-gradient(circle, rgba(100,160,255,0.28) 0%, rgba(100,160,255,0) 65%); }
+.dark .mega-orb-2   { background: radial-gradient(circle, rgba(255,100,160,0.24) 0%, rgba(255,100,160,0) 65%); }
+.dark .mega-orb-3   { background: radial-gradient(circle, rgba(80,210,160,0.22)  0%, rgba(80,210,160,0)  65%); }

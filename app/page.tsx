@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { WalletInput } from '@/components/wallet-input'
+import { ParticleBackground } from '@/components/particle-background'
 import { LoadingSteps } from '@/components/loading-steps'
 import { SummaryCard } from '@/components/summary-card'
 import { SignalsGrid } from '@/components/signals-grid'
@@ -93,7 +94,7 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="flex min-h-screen flex-1 flex-col bg-white">
+    <div className="flex min-h-screen flex-1 flex-col bg-background">
       <AnimatePresence mode="wait">
         {view === 'landing' && (
           <motion.div
@@ -102,9 +103,13 @@ export default function Home() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex w-full flex-1"
+            className="relative flex w-full flex-1 cursor-none"
           >
-            <WalletInput onAnalyze={handleAnalyze} />
+            <ParticleBackground />
+            {/* Content sits above the particle layer */}
+            <div className="relative z-10 flex w-full flex-1">
+              <WalletInput onAnalyze={handleAnalyze} />
+            </div>
           </motion.div>
         )}
 

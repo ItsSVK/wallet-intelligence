@@ -73,7 +73,7 @@ export function WalletInput({ onAnalyze }: WalletInputProps) {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
     >
-      <div className="w-full max-w-md space-y-10">
+      <div className="w-full max-w-md space-y-10 rounded-3xl bg-background px-10 py-12 ring-1 ring-border/40 shadow-xl shadow-black/4 dark:shadow-black/30">
         <div className="space-y-2">
           <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
             Solana
