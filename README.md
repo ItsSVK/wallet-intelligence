@@ -6,9 +6,30 @@
 
 Raw Solana transaction history is noisy and hard to interpret at a glance. Explorers show events; they do not easily answer “what kind of wallet is this?” or “what patterns stand out?” **Wallet Intelligence** bridges that gap: it fetches enhanced transactions, compresses them into structured analytics, and layers **deterministic charts and summaries** with **LLM-written narrative** so patterns, risk posture, and notable signals are understandable without digging through logs — with the model step going through **SolRouter**’s privacy-oriented stack.
 
+## Why private inference fits this use case
+
+Wallet intelligence is not generic chat: the model receives **rich structured analytics** — counterparty graphs, temporal patterns, protocol usage, anomaly hints — derived from a specific address. That payload can reveal **trading or automation patterns**, **relationships between addresses**, and **behavioral fingerprints** someone may not want copied into a standard third-party inference log or retained beyond the analysis. **Private inference** (via **SolRouter**, **Arcium**, **OpenServ**) aligns with treating that behavioral summary as sensitive: compute stays within a **cryptographically private** path instead of treating the whole prompt as disposable plaintext. For compliance-minded or security-conscious users — and for bounty/demo credibility — that match between **data sensitivity** and **inference privacy** is the point.
+
 ## How AI is used
 
-The app does **not** hallucinate chain data. **Helius** supplies transactions; the server builds a **structured feature payload** (graph metrics, counterparties, temporal patterns, protocols, anomaly hints, and more). That JSON is sent to a model through **SolRouter** (`@solrouter/sdk`) — the same **cryptographically private** Arcium / OpenServ-backed path summarized in the intro, instead of a generic API. A strict prompt requires the model to **ground claims in the numbers**, return **JSON only** (profile, behavior summary, insight cards, anomalies, soft forecasts, risk/confidence), and avoid price or identity claims. The UI merges that output with **rule-based fallbacks** when parsing or the API fails, so the dashboard stays useful either way.
+The app does **not** hallucinate chain data. **Helius** supplies transactions; the server builds a **structured feature payload** (graph metrics, counterparties, temporal patterns, protocols, anomaly hints, and more). That JSON is sent to a model through **SolRouter** (`@solrouter/sdk`) — the same **cryptographically private** Arcium / OpenServ-backed path summarized above, instead of a generic API. A strict prompt requires the model to **ground claims in the numbers**, return **JSON only** (profile, behavior summary, insight cards, anomalies, soft forecasts, risk/confidence), and avoid price or identity claims. The UI merges that output with **rule-based fallbacks** when parsing or the API fails, so the dashboard stays useful either way.
+
+## Architecture
+
+Request flow from the browser through chain data, structured analytics, private inference, and back to the UI:
+
+```mermaid
+flowchart TD
+  P["app/page.tsx"] -->|POST /api/analyze| R["route.ts"]
+  R --> H["Helius"]
+  H --> C["compressTransactions"]
+  C --> W["buildWalletAnalysisInput"]
+  W --> SR["analyzeWallet · SolRouter"]
+  SR --> AD["adaptAnalyzeResult"]
+  AD -->|NDJSON + AnalyzeResponse| P
+```
+
+`wallet-analysis.service.ts` wires Helius fetch and `analyzeWallet`; `response-builder` pulls in `data-builders` and `ai-parser`.
 
 ## Screens
 
