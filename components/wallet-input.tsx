@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { isValidSolanaAddress } from '@/lib/utils'
 
+const poweredByLinkClass =
+  'font-medium text-foreground/85 underline-offset-2 transition-colors hover:text-foreground hover:underline'
+
 interface WalletInputProps {
   onAnalyze: (address: string) => void
 }
@@ -119,9 +122,39 @@ export function WalletInput({ onAnalyze }: WalletInputProps) {
           </motion.div>
         </form>
 
-        <p className="text-center text-xs text-muted-foreground">
-          Analysis is read-only and does not require wallet connection.
-        </p>
+        <div className="space-y-2 text-center text-xs text-muted-foreground">
+          <p>Analysis is read-only and does not require wallet connection.</p>
+          <p>
+            Powered by{' '}
+            <a
+              href="https://solana.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={poweredByLinkClass}
+            >
+              Solana
+            </a>
+            {', '}
+            <a
+              href="https://solrouter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={poweredByLinkClass}
+            >
+              SolRouter
+            </a>
+            {' and '}
+            <a
+              href="https://www.helius.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={poweredByLinkClass}
+            >
+              Helius
+            </a>
+            .
+          </p>
+        </div>
       </div>
     </motion.div>
   )
