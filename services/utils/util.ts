@@ -2,7 +2,7 @@ import { SolRouterModel } from '@/services/clients/solrouter'
 import { AnalysisRuntimeConfig } from '@/services/types'
 
 const DEFAULT_MODEL: SolRouterModel = 'gpt-oss-20b'
-const DEFAULT_TRANSACTION_LIMIT = 50
+const DEFAULT_TRANSACTION_LIMIT = 100
 
 function readRequiredEnv(names: string[]) {
   for (const name of names) {

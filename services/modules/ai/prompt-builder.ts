@@ -1,89 +1,88 @@
 import type { WalletAnalysisInput } from '../wallet-analysis/types'
 
+/** Trim payload for the model: keep intelligence but cap very long address lists. */
+function compactInputForPrompt(input: WalletAnalysisInput): unknown {
+  const { intelligence, ...rest } = input
+  return {
+    ...rest,
+    intelligence: {
+      ...intelligence,
+      top_counterparties: intelligence.top_counterparties.slice(0, 12),
+      network: {
+        ...intelligence.network,
+        nodes: intelligence.network.nodes.slice(0, 14),
+        edges: intelligence.network.edges.slice(0, 14),
+      },
+    },
+  }
+}
+
 export function buildWalletAnalysisPrompt(input: WalletAnalysisInput): string {
+  const compact = compactInputForPrompt(input)
+
   const prompt = `
-You are an expert blockchain analyst specializing in Solana wallet behavior.
+You are an expert Solana on-chain analyst. Your job is to turn **structured analytics** into **actionable intelligence** for a human reader.
 
-You are given structured wallet analytics data (NOT raw transactions). The data already includes engineered features such as activity rate, flow direction, protocol usage, graph connectivity, and inferred intents.
-
-Your task is to produce a precise behavioral classification of the wallet.
+You receive engineered features derived from Helius enhanced transactions. The field \`intelligence\` is especially important: it contains **counterparty network statistics**, **UTC hourly activity**, **entropy of interactions**, and **deterministic anomaly_hints** — use these heavily. Ground every claim in the numbers; do not invent transaction types or protocols that are absent from the data.
 
 ---
 
-INPUT DATA:
-${JSON.stringify(input, null, 2)}
+INPUT (JSON):
+${JSON.stringify(compact, null, 2)}
 
 ---
 
-ANALYSIS RULES:
+HOW TO USE \`intelligence\`:
 
-1. Do NOT repeat or summarize the input.
-2. Focus strictly on INTERPRETATION and CLASSIFICATION.
-3. Be decisive. Avoid vague language like "possibly", "might", or "appears".
+- **counterparty_entropy** (0–1): Low = few dominant counterparties (bot-like loops, OTC, or repeated DEX routes). High = many distinct addresses (airdrop farming, broad retail usage, or mixing).
+- **top_counterparties**: Who the wallet repeatedly interacts with (programs, exchanges, or other wallets). Refer to addresses by short form (first 4 + last 4 chars) only.
+- **activity_by_hour** + **peak_hour_utc** + **active_hours_utc**: When activity happens. Comment on whether it looks automated (narrow UTC windows) vs spread out.
+- **network.nodes / edges**: A simplified star graph from the wallet — interpret concentration vs long tail.
+- **anomaly_hints**: Pre-computed flags — explain what they mean for THIS wallet in plain language (do not just repeat the hint text).
 
----
-
-SIGNAL PRIORITY (VERY IMPORTANT):
-
-Use signals in this order of importance:
-
-1. Graph signals (highest priority):
-   - concentration_score
-   - hub_score
-   - unique_connections
-
-2. Flow + activity:
-   - flow.direction
-   - activity.consistency_score
-   - activity.tx_per_minute
-
-3. Behavioral summaries:
-   - summary.wallet_type (validate or challenge it)
-   - recent_activity.intent
-   - protocols
+Combine with existing signals: **graph** (SOL-transfer edges), **fees**, **tx_types**, **swap_count**, **token_activity**, **temporal.burst_score**, **flow**, **protocols**.
 
 ---
 
-INTERPRETATION GUIDELINES:
+STRICT RULES:
 
-- High concentration_score -> repeated interactions -> trading bot / loop behavior
-- Low concentration_score -> wide distribution -> airdrop / spam pattern
-- High hub_score -> structured repeated interactions -> automation
-- High unique_connections -> broad network -> distribution or aggregator
-
-- High consistency_score -> automated/scripted behavior
-- Low consistency_score -> human / irregular usage
-
-- Mostly_outgoing -> distributor / sender
-- Mostly_incoming -> collector / receiver
-
-- Dust transfers + multi-recipient -> airdrop or spam bot
+1. Do NOT restate raw JSON. Synthesize.
+2. Be decisive; avoid filler ("might", "perhaps") unless uncertainty is explicit in the data.
+3. Never claim price, profit, or off-chain identity.
+4. **insight_cards** must be 4–7 items, each with a concrete takeaway tied to specific metrics.
 
 ---
 
-REQUIRED OUTPUT:
-
-You MUST determine:
-
-- wallet_profile (clear category: bot, trader, distributor, NFT user, etc.)
-- intent of activity
-- level of automation (manual vs automated)
-- key behavioral signals driving your conclusion
-
----
-
-OUTPUT FORMAT (STRICT JSON ONLY):
+REQUIRED OUTPUT — JSON ONLY (no markdown fences):
 
 {
-  "wallet_profile": "...",
-  "behavior_summary": "...",
-  "key_signals": ["...", "..."],
-  "activity_pattern": "...",
-  "flow_analysis": "...",
-  "protocol_usage_insight": "...",
+  "wallet_profile": "Short label, e.g. Active DEX user, NFT-focused wallet",
+  "behavior_summary": "2–4 sentences: the single clearest story about this wallet.",
+  "key_signals": ["bullet 1", "bullet 2", "bullet 3"],
+  "activity_pattern": "One paragraph on cadence and consistency (automation vs manual).",
+  "flow_analysis": "One paragraph on incoming vs outgoing and what it implies.",
+  "protocol_usage_insight": "One paragraph on dominant programs/sources.",
+  "insight_cards": [
+    {
+      "title": "Short headline",
+      "body": "2–4 sentences. Reference specific numbers (entropy, swap %, hours, fees).",
+      "category": "counterparty"
+    }
+  ],
+  "anomalies": ["Optional: unusual patterns worth watching, or empty array"],
+  "forecasts": [
+    "Soft, non-financial 'if history repeats' statements, e.g. likely next behavior — NOT price predictions."
+  ],
   "risk_level": "low | medium | high",
   "confidence": "low | medium | high"
 }
+
+**category** for insight_cards must be one of: "counterparty", "temporal", "risk", "behavior", "protocol", "fees".
+
+---
+
+FORECASTS RULE: Only behavioral predictions relative to this wallet's own history (e.g. "likely to keep routing through Jupiter-class activity if swap share stays high"). Never predict token prices.
+
 `
 
   return prompt.trim()

@@ -141,31 +141,27 @@ export function ParticleBackground() {
 
         // Connection line — brighter in dark mode
         if (dist > 0 && dist < ATTRACT_DIST) {
-          const t      = 1 - dist / ATTRACT_DIST
-          const dark   = isDark()
-          const lineA0 = dark ? t * 0.70 : t * 0.48
-          const lineA1 = dark ? t * 0.50 : t * 0.32
-          const grad   = ctx.createLinearGradient(mx, my, p.x, p.y)
-          grad.addColorStop(0, `rgba(${CURSOR_R},${CURSOR_G},${CURSOR_B},${lineA0})`)
-          grad.addColorStop(1, `rgba(${p.cr},${p.cg},${p.cb},${lineA1})`)
+          const t = 1 - dist / ATTRACT_DIST
+          const dark = isDark()
+          const lineA0 = dark ? t * 0.7 : t * 0.48
+          const lineA1 = dark ? t * 0.5 : t * 0.32
+          const mr = Math.round((CURSOR_R + p.cr) / 2)
+          const mg = Math.round((CURSOR_G + p.cg) / 2)
+          const mb = Math.round((CURSOR_B + p.cb) / 2)
+          const ma = (lineA0 + lineA1) / 2
           ctx.beginPath()
-          ctx.lineWidth   = 0.6 + t * 0.9
-          ctx.strokeStyle = grad
+          ctx.lineWidth = 0.6 + t * 0.9
+          ctx.strokeStyle = `rgba(${mr},${mg},${mb},${ma})`
           ctx.moveTo(mx, my)
           ctx.lineTo(p.x, p.y)
           ctx.stroke()
         }
 
-        // Glow halo (larger, more pronounced)
+        // Soft halo — single translucent fill (blur comes from radius vs opacity)
         const haloR = p.r * 3.8
-        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, haloR)
-        glow.addColorStop(0,    `rgba(${p.cr},${p.cg},${p.cb},0.9)`)
-        glow.addColorStop(0.35, `rgba(${p.cr},${p.cg},${p.cb},0.4)`)
-        glow.addColorStop(0.7,  `rgba(${p.cr},${p.cg},${p.cb},0.12)`)
-        glow.addColorStop(1,    `rgba(${p.cr},${p.cg},${p.cb},0)`)
         ctx.beginPath()
         ctx.arc(p.x, p.y, haloR, 0, Math.PI * 2)
-        ctx.fillStyle = glow
+        ctx.fillStyle = `rgba(${p.cr},${p.cg},${p.cb},0.14)`
         ctx.fill()
 
         // Sharp core

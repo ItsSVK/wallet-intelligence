@@ -5,7 +5,7 @@ import type {
   GetEnhancedTransactionsByAddressResponse,
 } from 'helius-sdk/enhanced/types'
 
-import type { CompressedTransaction } from './types'
+import type { CompressedTransaction, SwapSummary } from './types'
 
 const LAMPORTS_PER_SOL = 1_000_000_000
 
@@ -40,10 +40,12 @@ export function compressTransaction(tx: EnhancedTransaction): CompressedTransact
   }
 
   const nativeTransfers = tx.nativeTransfers ?? []
+  const tokenTransfers = tx.tokenTransfers ?? []
+
   if (nativeTransfers.length > 0) {
     const totalLamports = nativeTransfers.reduce((sum, transfer) => sum + transfer.amount, 0)
 
-    return {
+    const result: CompressedTransaction = {
       ...baseTransaction,
       action: {
         kind: 'SOL_TRANSFER',
@@ -60,9 +62,16 @@ export function compressTransaction(tx: EnhancedTransaction): CompressedTransact
         ).length,
       },
     }
+
+    // For SWAP transactions, also extract the token legs (sold / bought)
+    if ((tx.type ?? '').toUpperCase() === 'SWAP' && tokenTransfers.length > 0) {
+      const swap = extractSwapLegs(tokenTransfers, baseTransaction.actor)
+      if (swap) result.swap = swap
+    }
+
+    return result
   }
 
-  const tokenTransfers = tx.tokenTransfers ?? []
   if (tokenTransfers.length > 0) {
     return {
       ...baseTransaction,
@@ -82,6 +91,42 @@ export function compressTransaction(tx: EnhancedTransaction): CompressedTransact
       kind: 'UNKNOWN',
     },
   }
+}
+
+/**
+ * Resolves the two primary legs of a DEX swap from Helius tokenTransfers.
+ *
+ * Strategy (handles complex multi-hop routing):
+ *   - "Sold" = first transfer where fromUserAccount === actor (what the wallet sent)
+ *   - "Bought" = last transfer where toUserAccount === actor AND mint ≠ soldMint
+ *     (what the wallet received that isn't the same token it sold)
+ *
+ * Falls back to the last incoming transfer if every incoming mint matches the
+ * sold mint (rare edge case in same-token arbitrage).
+ */
+function extractSwapLegs(
+  transfers: EnhancedTokenTransfer[],
+  actor: string,
+): SwapSummary | undefined {
+  const outgoing = transfers.filter((t) => t.fromUserAccount === actor)
+  const incoming = transfers.filter((t) => t.toUserAccount === actor)
+
+  if (outgoing.length === 0 || incoming.length === 0) return undefined
+
+  const soldTransfer = outgoing[0]
+  const soldMint = soldTransfer.mint
+  const soldAmount = Number(soldTransfer.tokenAmount)
+
+  // Prefer incoming from a different mint (the actual bought token)
+  const boughtTransfer =
+    [...incoming].reverse().find((t) => t.mint !== soldMint) ?? incoming[incoming.length - 1]
+
+  const boughtMint = boughtTransfer.mint
+  if (boughtMint === soldMint) return undefined // same-token — not a meaningful swap
+
+  const boughtAmount = Number(boughtTransfer.tokenAmount)
+
+  return { soldMint, soldAmount, boughtMint, boughtAmount }
 }
 
 export function compressTransactions(

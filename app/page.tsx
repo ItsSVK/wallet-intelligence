@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WalletInput } from '@/components/wallet-input'
 import { ParticleBackground } from '@/components/particle-background'
@@ -13,8 +13,11 @@ import { MetricsPanel } from '@/components/metrics-panel'
 import { ActivityList } from '@/components/activity-list'
 import { FlowSection } from '@/components/flow-section'
 import { GraphIntelligence } from '@/components/graph-intelligence'
+import { AiInsightsSection } from '@/components/ai-insights-section'
+import { IntelligenceOverview } from '@/components/intelligence-overview'
 import { ProtocolUsage } from '@/components/protocol-usage'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { TokenActivity } from '@/components/token-activity'
+import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { AnalyzeResponse, AnalyzeStreamEvent } from '@/app/api/analyze/types'
 
@@ -128,7 +131,7 @@ export default function Home() {
             transition={{ duration: 0.25 }}
             className="w-full"
           >
-            <div className="mx-auto max-w-7xl px-6 py-8 lg:px-10">
+            <div className="mx-auto w-full min-w-0 max-w-none px-4 py-6 sm:px-5 sm:py-7 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
               {/* Back nav */}
               <div className="mb-6">
                 <button
@@ -148,23 +151,41 @@ export default function Home() {
                 riskLevel={result.riskLevel}
               />
 
-              {/* 2-column layout: 65% left / 35% right */}
-              <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-[65fr_35fr]">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: 0.02 }}
+                className="mt-8"
+              >
+                <AiInsightsSection
+                  cards={result.aiInsights.cards}
+                  forecasts={result.aiInsights.forecasts}
+                  anomalies={result.aiInsights.anomalies}
+                />
+              </motion.div>
+
+              {/* Main analysis: stack on small screens; ~58/42 then balances on wide screens */}
+              <div className="mt-8 grid min-w-0 grid-cols-1 gap-x-6 gap-y-6 md:gap-x-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] xl:gap-x-10 2xl:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] 2xl:gap-x-12">
                 {/* ── LEFT COLUMN ── */}
-                <div className="space-y-6">
+                <div className="min-w-0 space-y-6">
                   {/* Behavioral Summary */}
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25, delay: 0.05 }}
                   >
-                    <Card className="border-border bg-white">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
-                          Behavioral Summary
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
+                    <Card className="overflow-hidden border-border bg-card shadow-sm ring-1 ring-primary/10 dark:ring-primary/20">
+                      <div className="border-b border-violet-500/15 bg-violet-500/10 px-4 pt-4 dark:bg-violet-500/15">
+                        <div className="flex items-center gap-2 pb-3">
+                          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                            <FileText className="size-4" strokeWidth={2} />
+                          </div>
+                          <CardTitle className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                            Behavioral Summary
+                          </CardTitle>
+                        </div>
+                      </div>
+                      <CardContent className="pb-5">
                         <p className="text-sm leading-7 text-foreground">
                           {result.behaviorSummary}
                         </p>
@@ -192,7 +213,7 @@ export default function Home() {
                 </div>
 
                 {/* ── RIGHT COLUMN ── */}
-                <div className="space-y-4">
+                <div className="min-w-0 space-y-4">
                   {/* Flow Analysis */}
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -202,7 +223,16 @@ export default function Home() {
                     <FlowSection flow={result.flow} />
                   </motion.div>
 
-                  {/* Graph Intelligence */}
+                  {/* Counterparty + temporal (Helius-derived) */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, delay: 0.1 }}
+                  >
+                    <IntelligenceOverview data={result.intelligence} />
+                  </motion.div>
+
+                  {/* SOL-transfer graph metrics */}
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -228,6 +258,17 @@ export default function Home() {
                   >
                     <ProtocolUsage protocols={result.protocols} />
                   </motion.div>
+
+                  {/* Token Activity */}
+                  {result.tokenActivity.uniqueMints > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: 0.24 }}
+                    >
+                      <TokenActivity tokenActivity={result.tokenActivity} />
+                    </motion.div>
+                  )}
                 </div>
               </div>
 
@@ -238,9 +279,9 @@ export default function Home() {
                 transition={{ duration: 0.3, delay: 0.35 }}
                 className="mt-10 border-t border-border pt-4"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs text-muted-foreground">Analysis generated · Mar 2026</p>
-                  <Button variant="outline" size="sm" onClick={handleReset}>
+                  <Button variant="outline" size="sm" onClick={handleReset} className="w-full sm:w-auto">
                     Analyze another wallet
                   </Button>
                 </div>

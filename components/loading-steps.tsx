@@ -55,8 +55,8 @@ export function LoadingSteps({
           )}
         </div>
 
-        {/* Radial gradient vignette — same as MultiStepLoader */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-full bg-linear-to-t from-white via-white dark:from-black dark:via-black mask-[radial-gradient(900px_at_center,transparent_30%,white)]" />
+        {/* Vignette mask — same as MultiStepLoader */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-full bg-white mask-[radial-gradient(900px_at_center,transparent_30%,white)] dark:bg-black" />
       </motion.div>
     </AnimatePresence>
   )

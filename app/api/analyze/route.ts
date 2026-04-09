@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         await sleep(1000)
 
         controller.enqueue(chunk({ type: 'step', index: 2 }))
-        const input = buildWalletAnalysisInput(compressedTransactions)
+        const input = buildWalletAnalysisInput(address, compressedTransactions, transactions)
         await sleep(1000)
 
         controller.enqueue(chunk({ type: 'step', index: 3 }))

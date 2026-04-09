@@ -1,6 +1,7 @@
 import { Geist_Mono, Inter } from 'next/font/google'
 
 import './globals.css'
+import { FloatingThemeToggle } from '@/components/floating-theme-toggle'
 import { ThemeProvider } from '@/components/theme-provider'
 import { cn } from '@/lib/utils'
 import { Metadata } from 'next'
@@ -29,7 +30,10 @@ export default function RootLayout({
       className={cn('antialiased', fontMono.variable, 'font-sans', inter.variable)}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <FloatingThemeToggle />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

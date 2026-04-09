@@ -150,7 +150,7 @@ export const MultiStepLoader = ({
             <LoaderCore value={currentState} loadingStates={loadingStates} />
           </div>
 
-          <div className="absolute inset-x-0 bottom-0 z-20 h-full bg-white bg-linear-to-t mask-[radial-gradient(900px_at_center,transparent_30%,white)] dark:bg-black" />
+          <div className="absolute inset-x-0 bottom-0 z-20 h-full bg-white mask-[radial-gradient(900px_at_center,transparent_30%,white)] dark:bg-black" />
         </motion.div>
       )}
     </AnimatePresence>
