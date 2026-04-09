@@ -11,10 +11,10 @@ export type { AnalyzeResponse, AnalyzeStreamEvent } from './types'
 export const runtime = 'nodejs'
 
 const STEPS = [
-  'Fetching transactions...',
-  'Processing wallet activity...',
-  'Building behavioral model...',
-  'Analyzing with AI... (this may take a while)',
+  'Fetching on-chain transactions...',
+  'Compressing and structuring activity...',
+  'Computing analytics and signals...',
+  'Generating insights with private AI... (may take a moment)',
 ]
 
 const encoder = new TextEncoder()
