@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
@@ -11,6 +11,15 @@ import { cn } from '@/lib/utils'
 const iconTransition = {
   duration: 0.28,
   ease: [0.4, 0, 0.2, 1] as const,
+}
+
+/** Hydration-safe “client mounted” without setState-in-effect (next-themes needs client before showing theme). */
+function useIsClient() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  )
 }
 
 function KbdD() {
@@ -31,12 +40,8 @@ function KbdD() {
  * Fixed top-right: theme control + D shortcut (ThemeProvider). Single pill so copy stays legible over the canvas.
  */
 export function FloatingThemeToggle() {
-  const [mounted, setMounted] = useState(false)
+  const mounted = useIsClient()
   const { resolvedTheme, setTheme } = useTheme()
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   if (!mounted) {
     return (

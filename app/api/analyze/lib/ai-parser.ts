@@ -70,7 +70,9 @@ function normalizeAiShape(raw: Record<string, unknown>): ParsedAiAnalysis {
 
   return {
     ...raw,
-    insight_cards: Array.isArray(insight) ? (insight as ParsedAiAnalysis['insight_cards']) : undefined,
+    insight_cards: Array.isArray(insight)
+      ? (insight as ParsedAiAnalysis['insight_cards'])
+      : undefined,
     anomalies: Array.isArray(anomalies) ? (anomalies as string[]) : undefined,
     forecasts: Array.isArray(forecasts) ? (forecasts as string[]) : undefined,
   } as ParsedAiAnalysis

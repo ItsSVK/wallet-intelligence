@@ -34,12 +34,12 @@ export function TokenActivity({ tokenActivity }: { tokenActivity: TokenActivityD
         Token Activity
       </p>
       <Card className="border-border bg-card">
-        <CardHeader className="pb-2 pt-4">
+        <CardHeader className="pt-4 pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Top Tokens Transferred
             </CardTitle>
-            <span className="text-xs tabular-nums text-muted-foreground">
+            <span className="text-xs text-muted-foreground tabular-nums">
               {tokenActivity.uniqueMints} unique mint{tokenActivity.uniqueMints === 1 ? '' : 's'}
             </span>
           </div>
@@ -62,9 +62,7 @@ export function TokenActivity({ tokenActivity }: { tokenActivity: TokenActivityD
                       <span className="font-mono text-foreground/80" title={token.mint}>
                         {shortenMint(token.mint)}
                       </span>
-                      <span className="tabular-nums text-muted-foreground">
-                        {token.txCount} tx
-                      </span>
+                      <span className="text-muted-foreground tabular-nums">{token.txCount} tx</span>
                     </div>
                     <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
                       <motion.div

@@ -78,17 +78,12 @@ export function AiInsightsSection({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, delay: i * 0.04 }}
               >
-                <Card
-                  className={cn(
-                    'h-full border bg-card',
-                    styles.border,
-                  )}
-                >
+                <Card className={cn('h-full border bg-card', styles.border)}>
                   <CardHeader className="pb-2">
                     <div className="flex items-start gap-2">
                       <span className={cn('mt-1.5 size-1.5 shrink-0 rounded-full', styles.dot)} />
                       <div className="min-w-0 flex-1">
-                        <CardTitle className="text-sm font-semibold leading-snug text-foreground">
+                        <CardTitle className="text-sm leading-snug font-semibold text-foreground">
                           {card.title}
                         </CardTitle>
                         <span

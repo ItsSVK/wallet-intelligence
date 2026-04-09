@@ -74,7 +74,11 @@ export interface IntelligencePayload {
   active_hours_utc: number
   network: {
     center: string
-    nodes: Array<{ id: string; kind: 'wallet' | 'counterparty' | 'aggregate'; interactions: number }>
+    nodes: Array<{
+      id: string
+      kind: 'wallet' | 'counterparty' | 'aggregate'
+      interactions: number
+    }>
     edges: Array<{ from: string; to: string; weight: number }>
   }
   /** Deterministic hints for the model to interpret (not end-user labels). */

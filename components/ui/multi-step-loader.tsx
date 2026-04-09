@@ -82,9 +82,7 @@ export const LoaderCore = ({
             <div>
               {index > value && <CheckIcon className="text-black dark:text-white" />}
               {index === value && <SpinnerIcon className="text-black dark:text-white" />}
-              {index < value && (
-                <CheckFilled className="text-black dark:text-white" />
-              )}
+              {index < value && <CheckFilled className="text-black dark:text-white" />}
             </div>
             <span
               className={cn(
@@ -116,7 +114,9 @@ export const MultiStepLoader = ({
 
   useEffect(() => {
     if (!loading) {
-      setCurrentState(0)
+      queueMicrotask(() => {
+        setCurrentState(0)
+      })
       return
     }
     const timeout = setTimeout(() => {

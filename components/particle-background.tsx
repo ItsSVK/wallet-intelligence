@@ -18,42 +18,44 @@ interface Particle {
 
 const PALETTE: [number, number, number][] = [
   [255, 110, 120],
-  [80,  170, 255],
-  [60,  210, 170],
+  [80, 170, 255],
+  [60, 210, 170],
   [175, 110, 255],
-  [255, 155, 65 ],
-  [255,  90, 165],
-  [55,  200, 225],
-  [155, 215,  80],
-  [255, 190,  80],
+  [255, 155, 65],
+  [255, 90, 165],
+  [55, 200, 225],
+  [155, 215, 80],
+  [255, 190, 80],
   [130, 100, 255],
 ]
 
-const CURSOR_R = 160, CURSOR_G = 100, CURSOR_B = 255
+const CURSOR_R = 160,
+  CURSOR_G = 100,
+  CURSOR_B = 255
 
 // ── Loose orbital physics ────────────────────────────────────
-const PARTICLE_COUNT  = 110
-const ATTRACT_DIST    = 155   // outer attraction radius (px)
-const ORBIT_R         = 62    // target orbit radius (px)
-const ORBIT_SPEED     = 1.3   // target tangential speed (px/frame)
-const RADIAL_K        = 0.007 // weak spring — easy to escape
-const TANGENTIAL_K    = 0.035 // gentle tangential nudge
-const RADIAL_DAMP     = 0.07  // low damping — less "sticky"
-const RETURN_K        = 0.07  // fast drift recovery when mouse leaves
-const MOUSE_EASE      = 0.10  // trailing dot spring factor
+const PARTICLE_COUNT = 110
+const ATTRACT_DIST = 155 // outer attraction radius (px)
+const ORBIT_R = 62 // target orbit radius (px)
+const ORBIT_SPEED = 1.3 // target tangential speed (px/frame)
+const RADIAL_K = 0.007 // weak spring — easy to escape
+const TANGENTIAL_K = 0.035 // gentle tangential nudge
+const RADIAL_DAMP = 0.07 // low damping — less "sticky"
+const RETURN_K = 0.07 // fast drift recovery when mouse leaves
+const MOUSE_EASE = 0.1 // trailing dot spring factor
 // Mouse velocity scales down attraction — fast movement = easy detach
-const VEL_SCALE_K     = 0.10
+const VEL_SCALE_K = 0.1
 
 export function ParticleBackground() {
-  const canvasRef        = useRef<HTMLCanvasElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   // exact-position cursor (replaces real pointer) — blue dot
-  const exactCursorRef   = useRef<HTMLDivElement>(null)
+  const exactCursorRef = useRef<HTMLDivElement>(null)
   // trailing decorative dot — follows with easing
-  const trailCursorRef   = useRef<HTMLDivElement>(null)
-  const mouseRef         = useRef({ x: -2000, y: -2000 })
-  const prevMouseRef     = useRef({ x: -2000, y: -2000 })
-  const cursorPosRef     = useRef({ x: -2000, y: -2000 })
-  const rafRef           = useRef<number>(0)
+  const trailCursorRef = useRef<HTMLDivElement>(null)
+  const mouseRef = useRef({ x: -2000, y: -2000 })
+  const prevMouseRef = useRef({ x: -2000, y: -2000 })
+  const cursorPosRef = useRef({ x: -2000, y: -2000 })
+  const rafRef = useRef<number>(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -69,7 +71,7 @@ export function ParticleBackground() {
     const resize = () => {
       W = window.innerWidth
       H = window.innerHeight
-      canvas.width  = W
+      canvas.width = W
       canvas.height = H
     }
     resize()
@@ -80,10 +82,16 @@ export function ParticleBackground() {
       const bvx = (Math.random() - 0.5) * 0.22
       const bvy = (Math.random() - 0.5) * 0.22
       return {
-        x: Math.random() * W, y: Math.random() * H,
-        vx: bvx, vy: bvy, baseVx: bvx, baseVy: bvy,
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: bvx,
+        vy: bvy,
+        baseVx: bvx,
+        baseVy: bvy,
         r: Math.random() * 2.8 + 1.5,
-        cr, cg, cb,
+        cr,
+        cg,
+        cb,
         orbitDir: Math.random() < 0.5 ? 1 : -1,
       }
     })
@@ -95,21 +103,21 @@ export function ParticleBackground() {
       const prev = prevMouseRef.current
 
       // Mouse speed this frame — used to weaken attraction when moving fast
-      const mouseSpeed  = Math.sqrt((mx - prev.x) ** 2 + (my - prev.y) ** 2)
+      const mouseSpeed = Math.sqrt((mx - prev.x) ** 2 + (my - prev.y) ** 2)
       const attractScale = 1 / (1 + mouseSpeed * VEL_SCALE_K)
       prev.x = mx
       prev.y = my
 
       for (const p of particles) {
-        const dx   = mx - p.x
-        const dy   = my - p.y
+        const dx = mx - p.x
+        const dy = my - p.y
         const dist = Math.sqrt(dx * dx + dy * dy)
 
         if (dist > 0 && dist < ATTRACT_DIST) {
           const nx = dx / dist
           const ny = dy / dist
           const tx = -ny * p.orbitDir
-          const ty =  nx * p.orbitDir
+          const ty = nx * p.orbitDir
 
           // Radial spring scaled by mouse velocity
           const radialDiff = dist - ORBIT_R
@@ -123,7 +131,7 @@ export function ParticleBackground() {
 
           // Tangential push toward orbit speed
           const curTangentialV = p.vx * tx + p.vy * ty
-          const tangentialErr  = ORBIT_SPEED - curTangentialV
+          const tangentialErr = ORBIT_SPEED - curTangentialV
           p.vx += tx * tangentialErr * TANGENTIAL_K * attractScale
           p.vy += ty * tangentialErr * TANGENTIAL_K * attractScale
         } else {
@@ -178,7 +186,7 @@ export function ParticleBackground() {
 
       if (trailCursorRef.current) {
         trailCursorRef.current.style.left = `${cp.x}px`
-        trailCursorRef.current.style.top  = `${cp.y}px`
+        trailCursorRef.current.style.top = `${cp.y}px`
       }
 
       rafRef.current = requestAnimationFrame(loop)
@@ -190,7 +198,7 @@ export function ParticleBackground() {
       // Exact cursor: update immediately (zero lag — this IS the pointer)
       if (exactCursorRef.current) {
         exactCursorRef.current.style.left = `${e.clientX}px`
-        exactCursorRef.current.style.top  = `${e.clientY}px`
+        exactCursorRef.current.style.top = `${e.clientY}px`
       }
     }
     window.addEventListener('mousemove', onMove)
@@ -210,10 +218,10 @@ export function ParticleBackground() {
         <div className="mega-orb mega-orb-2" aria-hidden="true" />
         <div className="mega-orb mega-orb-3" aria-hidden="true" />
         {/* Smaller drifting orbs */}
-        <div className="orb orb-pink"     aria-hidden="true" />
-        <div className="orb orb-blue"     aria-hidden="true" />
-        <div className="orb orb-green"    aria-hidden="true" />
-        <div className="orb orb-orange"   aria-hidden="true" />
+        <div className="orb orb-pink" aria-hidden="true" />
+        <div className="orb orb-blue" aria-hidden="true" />
+        <div className="orb orb-green" aria-hidden="true" />
+        <div className="orb orb-orange" aria-hidden="true" />
         <div className="orb orb-lavender" aria-hidden="true" />
       </div>
 
@@ -237,8 +245,7 @@ export function ParticleBackground() {
             height: 11,
             borderRadius: '50%',
             background: 'rgba(37,99,235,1)',
-            boxShadow:
-              '0 0 6px 2px rgba(37,99,235,0.55), 0 0 16px 5px rgba(37,99,235,0.2)',
+            boxShadow: '0 0 6px 2px rgba(37,99,235,0.55), 0 0 16px 5px rgba(37,99,235,0.2)',
           }}
         />
       </div>

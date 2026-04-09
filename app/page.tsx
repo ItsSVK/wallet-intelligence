@@ -131,7 +131,7 @@ export default function Home() {
             transition={{ duration: 0.25 }}
             className="w-full"
           >
-            <div className="mx-auto w-full min-w-0 max-w-none px-4 py-6 sm:px-5 sm:py-7 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
+            <div className="mx-auto w-full max-w-none min-w-0 px-4 py-6 sm:px-5 sm:py-7 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
               {/* Back nav */}
               <div className="mb-6">
                 <button
@@ -281,7 +281,12 @@ export default function Home() {
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs text-muted-foreground">Analysis generated · Mar 2026</p>
-                  <Button variant="outline" size="sm" onClick={handleReset} className="w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                    className="w-full sm:w-auto"
+                  >
                     Analyze another wallet
                   </Button>
                 </div>

@@ -30,9 +30,7 @@ export function LoadingSteps({
   const loadingStates = allSteps.map((text) => ({ text }))
 
   // When isDone, mark all steps visually complete by pinning to the last index
-  const value = isDone
-    ? Math.max(loadingStates.length - 1, 0)
-    : Math.max(currentStepIndex, 0)
+  const value = isDone ? Math.max(loadingStates.length - 1, 0) : Math.max(currentStepIndex, 0)
 
   return (
     <AnimatePresence mode="wait">
@@ -41,14 +39,14 @@ export function LoadingSteps({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-100 flex w-full h-full items-center justify-center backdrop-blur-2xl"
+        className="fixed inset-0 z-100 flex h-full w-full items-center justify-center backdrop-blur-2xl"
       >
         <div className="relative h-96">
           {loadingStates.length > 0 ? (
             <LoaderCore loadingStates={loadingStates} value={value} />
           ) : (
             // Before the init event arrives — show a subtle pulse
-            <div className="flex flex-col items-center justify-center gap-3 mt-40">
+            <div className="mt-40 flex flex-col items-center justify-center gap-3">
               <div className="h-2 w-2 animate-ping rounded-full bg-foreground/40" />
               <span className="text-sm text-muted-foreground">Connecting…</span>
             </div>

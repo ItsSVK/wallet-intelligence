@@ -5,7 +5,6 @@ import type {
 } from '@/services/modules/wallet-analysis/types'
 
 type FlowDirection = AnalyzeResponse['flow']['direction']
-type RecentActivityItem = WalletAnalysisInput['recent_activity'][number]
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
 
@@ -294,26 +293,6 @@ export function buildTokenActivity(
       txCount: t.tx_count,
     })),
   }
-}
-
-// ─── Type guards ─────────────────────────────────────────────────────────────
-
-function isSolTransferActivity(
-  value: RecentActivityItem | undefined,
-): value is Extract<RecentActivityItem, { kind: 'SOL_TRANSFER' }> {
-  return Boolean(value && value.kind === 'SOL_TRANSFER')
-}
-
-function isNftTransferActivity(
-  value: RecentActivityItem | undefined,
-): value is Extract<RecentActivityItem, { kind: 'NFT_TRANSFER' }> {
-  return Boolean(value && value.kind === 'NFT_TRANSFER')
-}
-
-function isTokenTransferActivity(
-  value: RecentActivityItem | undefined,
-): value is Extract<RecentActivityItem, { kind: 'TOKEN_TRANSFER' }> {
-  return Boolean(value && value.kind === 'TOKEN_TRANSFER')
 }
 
 // ─── Intelligence (deterministic view model) ────────────────────────────────

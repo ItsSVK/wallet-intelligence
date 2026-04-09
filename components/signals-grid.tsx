@@ -61,7 +61,7 @@ export function SignalsGrid({ signals }: { signals: Signal[] }) {
                       <Icon className="size-4" strokeWidth={2} />
                     </div>
                     <div className="min-w-0 flex-1 space-y-1.5">
-                      <CardTitle className="text-sm font-semibold leading-snug text-foreground">
+                      <CardTitle className="text-sm leading-snug font-semibold text-foreground">
                         {signal.title}
                       </CardTitle>
                       <CardDescription className="text-xs leading-relaxed text-muted-foreground">

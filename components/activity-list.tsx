@@ -148,7 +148,7 @@ export function ActivityList({ items }: { items: ActivityItem[] }) {
                         {item.intent.replace(/_/g, ' ')}
                       </span>
                     )}
-                    <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground/60">
+                    <span className="text-xs whitespace-nowrap text-muted-foreground/60 tabular-nums">
                       {item.timestamp}
                     </span>
                   </div>
